@@ -1,6 +1,6 @@
 # Account Context
 
-The fixtures in `fixtures/` are the starter account data. Candidates may migrate this data into any reasonable database, but the final implementation should preserve the same business concepts.
+The fixtures in `fixtures/` are the starter account data. The migration in `supabase/migrations/` seeds the standard account into a minimal table outline. Candidates should evolve that schema as needed, and the final implementation should preserve the same business concepts.
 
 ## Mutable Fields
 
