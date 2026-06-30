@@ -14,50 +14,11 @@ import {
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import type { LegacyAccountFixture } from "@/lib/account/types";
 import { cn } from "@/lib/utils";
 
-type ArrangementOption = {
-  frequency: string;
-  installments: number;
-  suggestedAmountCents: number;
-};
-
-type PortalFixture = {
-  account: {
-    accountId: string;
-    debtorFirstName: string;
-    debtorLastName: string;
-    email: string;
-    reference: string;
-    creditorName: string;
-    currency: string;
-    balanceCents: number;
-    status: string;
-    daysPastDue: number;
-    minimumPaymentCents: number;
-    lastPaymentDate: string;
-    lastPaymentAmountCents: number;
-  };
-  billing: {
-    currentAmountCents: number;
-    lastStatementAmountCents: number;
-    dueDate: string;
-  };
-  paymentOptions: {
-    payNowEnabled: boolean;
-    promiseToPayEnabled: boolean;
-    arrangementEnabled: boolean;
-    eligibleArrangementOptions: ArrangementOption[];
-  };
-  support: {
-    humanSupportAvailable: boolean;
-    supportPhone: string;
-    supportEmail: string;
-  };
-};
-
 type PortalProps = {
-  fixture: PortalFixture;
+  fixture: LegacyAccountFixture;
 };
 
 type View = "dashboard" | "conversations";
@@ -155,10 +116,10 @@ export function DebtorPortal({ fixture }: PortalProps) {
               </div>
               <div>
                 <h1 className="text-3xl font-semibold tracking-tight text-slate-900">
-                  Customer Portal
+                  Account Portal
                 </h1>
                 <p className="mt-2 max-w-[14rem] text-sm leading-6 text-slate-600">
-                  Simple account summary and message view for the customer.
+                  Simple account summary and message view for self-service.
                 </p>
               </div>
             </div>
@@ -222,7 +183,7 @@ function DashboardView({
   fixture,
   fullName,
 }: {
-  fixture: PortalFixture;
+  fixture: LegacyAccountFixture;
   fullName: string;
 }) {
   return (
@@ -276,7 +237,7 @@ function DashboardView({
 
       <section className="flex-1 rounded-[2rem] border border-white/75 bg-white/78 p-6 shadow-[0_24px_60px_rgba(15,23,42,0.08)] backdrop-blur-sm sm:p-8">
         <h3 className="text-2xl font-semibold tracking-tight text-slate-950">
-          Person info
+          Account info
         </h3>
         <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           <InfoRow
@@ -290,19 +251,19 @@ function DashboardView({
             value={fixture.account.email}
           />
           <InfoRow
+            icon={Phone}
+            label="Phone"
+            value={fixture.account.phone}
+          />
+          <InfoRow
+            icon={LayoutGrid}
+            label="Preferred contact"
+            value={fixture.account.preferredContactMethod.toUpperCase()}
+          />
+          <InfoRow
             icon={LayoutGrid}
             label="Creditor"
             value={fixture.account.creditorName}
-          />
-          <InfoRow
-            icon={LayoutGrid}
-            label="Account ID"
-            value={fixture.account.accountId}
-          />
-          <InfoRow
-            icon={Phone}
-            label="Support phone"
-            value={fixture.support.supportPhone}
           />
           <InfoRow
             icon={CalendarDays}

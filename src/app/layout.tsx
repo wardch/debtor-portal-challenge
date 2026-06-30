@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Debtor Portal",
+  title: "Account Self-Service Chatbot",
   description:
-    "A minimal debtor self-service chat portal challenge starter.",
+    "A minimal account self-service chatbot challenge starter.",
 };
 
 export default function RootLayout({

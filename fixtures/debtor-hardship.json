@@ -4,6 +4,15 @@
     "debtorFirstName": "Aoife",
     "debtorLastName": "Kelly",
     "email": "aoife.kelly@example.test",
+    "phone": "+353831234567",
+    "address": {
+      "line1": "7 Orchard Green",
+      "line2": "Salthill",
+      "city": "Galway",
+      "postalCode": "H91 K812",
+      "country": "Ireland"
+    },
+    "preferredContactMethod": "sms",
     "reference": "WTR-2026-000812",
     "creditorName": "Example Water Services",
     "currency": "EUR",
@@ -22,24 +31,67 @@
   "paymentOptions": {
     "payNowEnabled": true,
     "promiseToPayEnabled": true,
-    "arrangementEnabled": true,
-    "eligibleArrangementOptions": [
-      {
-        "frequency": "weekly",
-        "installments": 12,
-        "suggestedAmountCents": 13017
-      },
-      {
-        "frequency": "monthly",
-        "installments": 6,
-        "suggestedAmountCents": 26034
-      }
-    ]
+    "mockPaymentsEnabled": true,
+    "arrangementEnabled": false,
+    "eligibleArrangementOptions": []
   },
   "support": {
     "humanSupportAvailable": true,
     "supportPhone": "+35318000002",
     "supportEmail": "support-hardship@example.test"
+  },
+  "relatedPeople": [
+    {
+      "id": "rel_hardship_001",
+      "name": "Niamh Kelly",
+      "email": "niamh.kelly@example.test",
+      "phone": "+353831445566",
+      "relationship": "sibling",
+      "authorizedToAct": true
+    }
+  ],
+  "promisesToPay": [
+    {
+      "id": "ptp_hardship_001",
+      "amountCents": 15000,
+      "currency": "EUR",
+      "dueDate": "2026-07-10",
+      "status": "active",
+      "createdAt": "2026-06-22T14:40:00Z"
+    }
+  ],
+  "transactions": [
+    {
+      "id": "txn_hardship_001",
+      "type": "payment",
+      "status": "completed",
+      "amountCents": 1500,
+      "currency": "EUR",
+      "description": "Card payment",
+      "transactionDate": "2025-11-28"
+    },
+    {
+      "id": "txn_hardship_002",
+      "type": "fee",
+      "status": "posted",
+      "amountCents": 8100,
+      "currency": "EUR",
+      "description": "Late fees",
+      "transactionDate": "2025-12-15"
+    }
+  ],
+  "callAppointments": [
+    {
+      "id": "call_hardship_001",
+      "scheduledAt": "2026-07-06T11:00:00+01:00",
+      "phone": "+353831234567",
+      "reason": "Talk through account support options",
+      "status": "scheduled"
+    }
+  ],
+  "notificationRules": {
+    "sendEmailOnDataChange": true,
+    "pdfPasswordSource": "account_phone_last4"
   },
   "faqContext": {
     "recentStatementReason": "Balance carried forward with late fees applied",

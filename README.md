@@ -1,10 +1,12 @@
-# Debtor Portal Challenge
+# Account Self-Service Chatbot Challenge
 
-Continue building this repo into a small but production-minded debtor portal chat experience that helps a debtor resolve their account.
+Build this starter into a small but credible account self-service chatbot for an overdue receivables account.
+
+The goal is to test whether you can turn natural-language customer requests into safe, persistent product actions. The app should feel simple, but the backend behaviour should be clear enough that a reviewer can inspect what happened and why.
 
 ## Start here
 
-The easiest way to get set up is to create your own private copy of this repo first, then run it locally:
+Create your own private copy of this repository first, then run it locally:
 
 1. On GitHub, click the green `Use this template` button.
 2. Create a new repository from this template.
@@ -15,15 +17,21 @@ The easiest way to get set up is to create your own private copy of this repo fi
 7. Run `pnpm dev`.
 8. Open `http://localhost:3000` in your browser, or use the next available port shown by Next.js.
 
+Useful checks:
+
+- `pnpm lint`
+- `pnpm typecheck`
+- `pnpm test`
+
 ## UI preview
 
 This is what the starter UI looks like before you begin extending it:
 
-![Starting Debtor Portal UI](./public/readme-images/ui-dashboard-start.png)
+![Starting Account Portal UI](./public/readme-images/ui-dashboard-start.png)
 
 ## Recommended: deploy to Vercel immediately
 
-It is worth wiring up deployment before you start building so you always have a live URL to test and share.
+Wire up deployment before you start building so you always have a live URL to test and share.
 
 1. Create a Vercel account at [vercel.com](https://vercel.com/) if you do not already have one.
 2. In Vercel, click `Add New...` and choose `Project`.
@@ -34,80 +42,173 @@ It is worth wiring up deployment before you start building so you always have a 
 
 ## The task
 
-Use the existing implementation in this repository as your starting point. You should extend it into a simple but credible debtor self-service flow.
+Use the existing implementation in this repository as your starting point. Extend it into an account self-service chatbot where an account holder can ask questions and perform account actions through chat.
 
-A debtor opens the portal and sends a message such as:
+You do not need to integrate Stripe or any real payment processor. All payments in this challenge are mocked.
 
-- "I can pay this now"
-- "I can pay next Friday"
-- "I need a payment plan"
-- "Why is this amount different from last month?"
-- "This balance is wrong"
-- "Can someone help me?"
+A user might send messages such as:
 
-Your system should turn the message into a clear, structured outcome and route the debtor into one of these paths:
+- "Can you add my brother Mark as someone who can speak for me?"
+- "What's the email address on my account?"
+- "Change my preferred contact method to SMS."
+- "Can I pay 500 euro on the 1st of next month?"
+- "Show me all my promises to pay."
+- "Pay 150 euro now."
+- "Can I book a call with an agent next Tuesday morning?"
+- "Show my previous transactions."
+- "Change Mark's phone number to +353831112233."
 
-- Pay now
-- Promise to pay
-- Payment arrangement
-- Question
-- Dispute or human support
+Your chatbot should parse the request, ask for missing details where needed, apply valid changes to persistent data, and return a clear confirmation.
 
 ## Minimum expected behaviour
 
-### Pay now
+### Account lookup
 
-- Detect immediate payment intent
-- Route to a mocked or sandbox payment flow. [Stripe](https://stripe.com/) is a straightforward option if you want to simulate a test payment in a sandbox environment, otherwise a mocked payment flow is also fine.
+- Read the current account holder's name, email address, phone number, postal address, preferred contact method, balance, related people, transactions, promises to pay, and future call appointments.
+- Use the fixture data in `fixtures/` as the starting account context.
+- Seed or migrate the data into your chosen database so changes survive refreshes.
+
+### Update account holder details
+
+- Let the account holder update their name, email address, phone number, and postal address through chat.
+- Let the account holder read those details back through chat.
+- Validate obvious bad inputs, such as an invalid email address or an empty name.
+
+### Preferred contact method
+
+- Let the account holder read and update their preferred contact method.
+- Supported methods are `email`, `sms`, and `phone`.
+- Confirm the new preference in chat and persist it.
+
+### Related people and authorization
+
+- Let the account holder add a related person who can represent them.
+- Capture the related person's name, phone number, and email address.
+- Store whether the related person is authorized to act on the account holder's behalf.
+- Let the account holder read, update, and remove related people.
+- The chatbot should be able to edit both account-holder details and related-person details.
 
 ### Promise to pay
 
-- Detect a single future payment commitment
-- Capture at least a payment date
-- Show a confirmation summary
+- Support one-time promises to pay in the future.
+- Capture at least amount and due date.
+- Example: "Can I pay 500 euro on the 1st of next month?"
+- Store the promise to pay in the database.
+- Let the account holder read all promises to pay.
+- Do not build multi-payment plans for this challenge.
 
-### Payment arrangement
+### Mock payment
 
-- Detect intent to pay over time
-- For example, a debtor might pay 50% now and the remaining 50% over a fixed schedule such as 3 weekly or monthly installments
-- Capture a simple proposed arrangement
-- Show a confirmation summary
+- Let the account holder make a mocked payment through chat.
+- Pretend payment details are already on file.
+- Confirm that the amount was deducted from their account.
+- Record the payment as a transaction.
+- Deduct the paid amount from the persisted account balance.
+- Do not call Stripe or any other real payment provider.
 
-### Question
+### Transactions
 
-- Answer a relevant account question using the provided account context
-- Then steer the debtor back toward resolution where appropriate
+- Let the account holder read all previous transactions.
+- Include seeded transactions from the fixture and new mocked payments created during the chat.
+- Show useful fields such as date, amount, type, status, and description.
 
-### Dispute or human support
+### Call appointments
 
-- Route disputes, sensitive issues, or unclear or high-risk cases to human review
-- A simple acknowledgement is enough here, for example: "Thanks for flagging this. I'm handing this off to a colleague who can help, and we'll be in touch soon with an update."
-- Do not attempt full automated resolution for these cases
+- Let the account holder book a future phone call with an agent.
+- Capture date, time, phone number, and short reason where possible.
+- Let the account holder view future call appointments.
+- Reject appointment requests that are clearly in the past.
+
+### Email notification and encrypted PDF
+
+Use [Resend](https://resend.com/) for email sending. It has a free tier.
+
+Whenever the chatbot changes persisted account data, send a generic notification email to the account holder's current email address. The email body should not contain sensitive account detail. Put the sensitive detail in an encrypted PDF attachment.
+
+The PDF should include:
+
+- Account summary
+- Related people, if any
+- Transactions
+- Current contact details
+- Preferred contact method
+- Promises to pay
+- Future call appointments
+- Current balance
+
+Use the last 4 digits of the account holder's phone number as the PDF password. The starting phone number for every fixture account is `+353831234567`, so the initial PDF password is `4567`.
+
+For local development, it is acceptable to log the email payload when Resend credentials are missing, but the production/deployed app should be wired to Resend.
+
+For tests, mock the notification boundary. Do not make automated tests depend on live Resend delivery or real inbox inspection. Reviewers should be able to verify from code and logs that production sends through Resend and attaches the encrypted PDF.
 
 ## LLM guidance
 
-In production, we would likely recommend an LLM for parsing free-text debtor messages into structured intent and relevant details.
+You may use an LLM to parse free-text messages into structured actions and fields, but you do not have to.
 
-After that, you can use an LLM again or whatever approach you think is best for the product and risk profile.
+A deterministic parser, rule-based intent router, structured form fallback, or hybrid approach is also acceptable if it works well. What matters is that the system:
 
-It matters less which implementation path you choose and more that the system triages debtors effectively, safely, and clearly.
-
-Keep the decisioning controlled and explainable, with sensible fallback behaviour for low-confidence or ambiguous cases.
+- handles the required workflows
+- asks for missing information instead of guessing dangerous details
+- keeps state transitions understandable and testable
+- has sensible fallback behaviour for ambiguous messages
+- avoids exposing sensitive data in email bodies or logs
 
 ## Technical expectations
 
-- Build on top of this repository rather than starting from scratch
-- Use a database for persistence
-- Supabase is recommended, but not required if you can justify an alternative
-- Keep the routing and state transitions understandable and testable
+- Build on top of this repository rather than starting from scratch.
+- Use a database for persistence.
+- Supabase is recommended, but not required if you justify an alternative.
+- Keep the chat action routing and database writes understandable and testable.
+- Keep payment mocked.
+- Remove or avoid any Stripe dependency, Stripe route, or Stripe copy.
+- Treat account data as sensitive. Do not log full account summaries, PDF passwords, or sensitive PDF contents.
+- Prefer small, focused services for parsing, validation, persistence, payment mocking, appointment booking, and email/PDF notification.
 
 ## What is already provided
 
-- A Next.js app with a debtor portal UI
-- A fixture-backed account summary using `fixtures/debtor-standard.json`
-- Deterministic placeholder chat behaviour in `src/components/debtor-portal.tsx`
-- A Conversations view where you can see the AI messaging experience in the UI; you will need to implement the backend that powers real conversation handling
-- Supabase environment scaffolding for later persistence work
+- A Next.js app with a basic account portal UI.
+- A fixture-backed account summary using `fixtures/debtor-standard.json`.
+- Additional scenario fixtures in `fixtures/`.
+- Deterministic placeholder chat behaviour in `src/components/debtor-portal.tsx`.
+- Typed account and chat contracts in `src/lib/account/types.ts` and `src/lib/chat/types.ts`.
+- A placeholder `/api/chat` route for the backend boundary.
+- A notification boundary stub for the Resend and encrypted PDF side effect.
+- Starter Vitest setup with fixture validation and skipped acceptance-contract examples.
+- Scenario and account-context docs in `docs/`.
+- A Conversations view where you can see the chat experience in the UI.
+- Supabase environment scaffolding for later persistence work.
+
+The backend/API for real message processing is not implemented yet.
+
+## Suggested data model
+
+You may choose your own schema, but your system will probably need tables or collections for:
+
+- account holders
+- current contact details
+- related people
+- promises to pay
+- transactions
+- call appointments
+- chat messages or conversation turns
+- notification attempts
+
+You do not need to perfectly mirror PayPathIQ. This is a focused challenge for a single-account chatbot.
+
+## Example acceptance scenarios
+
+Your submission should handle these flows end to end. See `docs/scenarios.md` for more detail.
+
+1. User asks, "What phone number is on my account?" Chatbot returns the current phone number.
+2. User asks, "Change my phone number to +353831112233." Chatbot updates the database, confirms the change, and sends the notification email with encrypted PDF.
+3. User asks, "Add Mark Murphy, mark@example.test, +353831998877 so he can act for me." Chatbot creates an authorized related person and sends the notification email with encrypted PDF.
+4. User asks, "Can I pay 500 euro on the 1st of next month?" Chatbot records a one-time promise to pay with amount and date.
+5. User asks, "Show my promises to pay." Chatbot lists stored promises.
+6. User asks, "Pay 150 euro now." Chatbot records a mocked payment transaction and reduces the account balance.
+7. User asks, "Show my transactions." Chatbot lists seeded and newly created transactions.
+8. User asks, "Book a call next Tuesday at 10am about my bill." Chatbot schedules a future call appointment.
+9. User asks, "What calls do I have booked?" Chatbot lists future call appointments.
 
 ## Deliverables
 
@@ -116,14 +217,13 @@ Submit:
 - source code in this repository
 - setup instructions
 - a deployed version of the application, with the live URL linked from `README.md`
-- an updated `README.md` that includes a short design note of no more than 800 words covering architecture, tradeoffs, assumptions, and how you would improve, monitor, and evolve the system over time
-- an architecture diagram saved in the repo root as `architecture-diagram.png`, `architecture-diagram.pdf`, or `architecture-diagram.md`. This can be a hand-drawn picture or something made in a free tool like [Excalidraw](https://excalidraw.com/); it does not need to be perfect, it just needs to illustrate the overall system clearly
-- tests for the core decision logic
+- an updated `README.md` with a short design note of no more than 800 words covering architecture, tradeoffs, assumptions, and how you would improve, monitor, and evolve the system over time
+- an architecture diagram saved in the repo root as `architecture-diagram.png`, `architecture-diagram.pdf`, or `architecture-diagram.md`
+- tests for the core decision/action logic
 
-Your `README.md` should link to the architecture diagram if you include one.
-Your `README.md` should also link to the deployed application URL.
+Your `README.md` should link to the architecture diagram and deployed application URL.
 
-Your write-up should explicitly answer the question: how can you improve and monitor this system over time?
+Your write-up should explicitly answer: how can you improve and monitor this system over time?
 
 ## Use of AI coding tools
 
@@ -139,39 +239,57 @@ However, you are responsible for the submission and should be able to explain:
 ## What we're evaluating
 
 - product and engineering judgment
-- clarity of triage behaviour
-- effectiveness of the triage approach, regardless of implementation style
-- quality of backend logic and data modelling
-- handling of ambiguous input
+- safe handling of account data
+- quality of chat intent/action handling
+- quality of database design and persistence
+- quality of validation and error handling
+- mocked payment correctness, including balance deduction and transaction history
+- email/PDF notification implementation
+- handling of ambiguous input and missing details
 - code quality and structure
 - test quality
 - clarity of explanation
 - quality of the suggested iteration path over time
 
+Hard failure cases:
+
+- no persistence for changed account data
+- no tests for core decision/action logic
+- real payment provider integration instead of mocked payment
+- sensitive account detail in the email body
+- account data changes with no notification attempt
+- deployed submission cannot send through Resend with an encrypted PDF attachment
+- broad rewrites that discard the starter UI instead of building on it
+
 ## Provided input data
 
-We will provide sample JSON files containing debtor account context for the chat experience.
+Sample account context lives in `fixtures/`.
 
-Current fixtures live in `fixtures/`.
+Every fixture starts with phone number `+353831234567`, so the initial encrypted PDF password is `4567`.
+
+You may change the fixture shape if your implementation needs it, but document the final shape in your design note.
 
 ## Submission notes
 
-- Use the GitHub `Use this template` button to create your own repository from this starter before you begin
-- Set the new repository visibility to `Private`
-- Do not push your submission to the shared source repository
-- Treat your private copy of this repository as the submission artifact
-- When you are finished, invite `wardch` as a collaborator so the submission can be reviewed
-- Keep your write-up in `README.md` so reviewers can find it immediately
-- Deploy the app with [Vercel](https://vercel.com/) so reviewers can try it easily
-- Include the deployed URL prominently in `README.md`
-- Put the architecture diagram in the repo root and reference it from `README.md`
-- If you make reasonable scope cuts, document them clearly
-
-Use the `Conversations` section in the portal UI to see the AI messaging flow on the frontend. The backend/API for real message processing is not implemented yet.
+- Use the GitHub `Use this template` button to create your own repository from this starter before you begin.
+- Set the new repository visibility to `Private`.
+- Do not push your submission to the shared source repository.
+- Treat your private copy of this repository as the submission artifact.
+- When you are finished, invite `wardch` as a collaborator so the submission can be reviewed.
+- Keep your write-up in `README.md` so reviewers can find it immediately.
+- Deploy the app with [Vercel](https://vercel.com/) so reviewers can try it easily.
+- Include the deployed URL prominently in `README.md`.
+- Put the architecture diagram in the repo root and reference it from `README.md`.
+- If you make reasonable scope cuts, document them clearly.
 
 ## Project structure
 
-- `src/app/page.tsx` wires the standard fixture into the main portal UI
-- `src/components/debtor-portal.tsx` contains the current page layout, chat state, and placeholder routing behaviour
-- `src/lib/supabase/client.ts` provides a browser client factory for later integration
-- `fixtures/` contains the provided debtor account data
+- `src/app/page.tsx` wires the standard fixture into the main portal UI.
+- `src/components/debtor-portal.tsx` contains the current page layout, chat state, and placeholder reply behaviour.
+- `src/app/api/chat/route.ts` marks the backend chat boundary candidates should implement.
+- `src/lib/account/types.ts` and `src/lib/chat/types.ts` define the starter contracts.
+- `src/lib/notifications/account-change-notification.ts` marks the notification side-effect boundary candidates should implement.
+- `docs/account-context.md` explains fixture fields and mutability.
+- `docs/scenarios.md` gives acceptance-flow examples.
+- `src/lib/supabase/client.ts` provides a browser client factory for later integration.
+- `fixtures/` contains the provided account data.
