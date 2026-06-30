@@ -106,10 +106,6 @@ Wire up deployment before you start building so you always have a live URL to te
 
 Use the existing implementation in this repository as your starting point. Extend it into an account self-service chatbot where an account holder can ask questions and perform account actions through chat.
 
-You do not need to integrate Stripe or any real payment processor. All payments in this challenge are mocked.
-
-Do not overbuild the scope. You do not need to add an authentication system, Stripe, a multi-account admin dashboard, recurring payment plans, or a production-grade collections workflow. Focus on the single-account chatbot flows in this brief.
-
 A user might send messages such as:
 
 - "Can you add my brother Mark as someone who can speak for me?"
@@ -124,28 +120,28 @@ A user might send messages such as:
 
 Your chatbot should parse the request, ask for missing details where needed, apply valid changes to persistent data, and return a clear confirmation.
 
-## Golden path checklist
+## Recommended build path
 
-A strong submission will usually move through this path:
+Most good submissions will follow this path:
 
-- seed Supabase from the provided fixture data
+- seed Supabase from the fixture data
 - replace the starter fixture read with a real account loaded from the database
-- implement the `/api/chat` route and connect the chat UI to it
-- parse customer messages into structured intents and fields
+- implement `/api/chat` so messages become structured actions and fields
 - validate each action before writing account data
 - persist account, related-person, promise, payment, transaction, and call changes
-- send the generic notification email with encrypted PDF after data changes
+- send the notification email with encrypted PDF after data changes
 - refresh the UI from persisted account state
-- turn the skipped acceptance contracts into real tests, or add equivalent coverage
+- turn the skipped acceptance tests into real tests, or add equivalent coverage
 - deploy the app and document the live URL
 
-## Mocking rules
+## Scope and mocking rules
 
 - Mock payments only. Do not integrate Stripe or any real payment provider.
 - You may log notification payloads locally when Resend credentials are missing.
 - The deployed app should send through Resend and attach the encrypted PDF.
 - Automated tests should mock LLM providers, Resend, PDF delivery, and payment side effects.
 - Do not commit API keys, Resend keys, Supabase service-role keys, or generated PDF passwords.
+- Do not add an authentication system, a multi-account admin dashboard, recurring payment plans, or a production-grade collections workflow.
 
 ## Minimum expected behaviour
 
@@ -233,11 +229,11 @@ For tests, mock the notification boundary. Do not make automated tests depend on
 
 You should use an LLM to parse free-text messages into structured actions and fields. This is one of the most useful parts of the exercise: the system needs to infer intent and extract details from messy incoming text before applying controlled business logic.
 
-You can use your own API key from a provider such as OpenAI, Anthropic, OpenRouter, or another model service. Some providers offer free credits for new accounts. Do not commit API keys or secrets to the repository.
+You can use your own API key from a provider such as OpenAI, Anthropic, OpenRouter, or another model service. Do not commit API keys or secrets to the repository.
 
 Good enough is structured extraction plus deterministic validation. Prefer a small parser that turns a customer message into an intent and fields, followed by explicit validation and business logic. You do not need to build a fully autonomous agent framework.
 
-A deterministic validator, rule-based action router, structured form fallback, or hybrid approach is still useful after the LLM parses the message. What matters is that the system:
+A rule-based action router, structured form fallback, or hybrid approach is also fine. What matters is that the system:
 
 - handles the required workflows
 - asks for missing information instead of guessing dangerous details
@@ -245,53 +241,20 @@ A deterministic validator, rule-based action router, structured form fallback, o
 - has sensible fallback behaviour for ambiguous messages
 - avoids exposing sensitive data in email bodies or logs
 
-## Technical expectations
+## Technical notes
 
-- Build on top of this repository rather than starting from scratch.
-- Use Supabase for persistence.
-- Start from the migration stub in `supabase/migrations/`, then create and document a Supabase schema that stores the mutable account data, seeded fixture data, chat-visible state, and notification attempts.
-- Keep the chat action routing and database writes understandable and testable.
-- Keep payment mocked.
-- Remove or avoid any Stripe dependency, Stripe route, or Stripe copy.
+- Build on this repository rather than starting from scratch.
+- Use Supabase so changed account data survives refreshes.
+- Start from `supabase/migrations/`, which includes a minimal table outline and seeded Jane Murphy account data.
+- You may change the schema, but document the final shape and tradeoffs in your design note.
 - Treat account data as sensitive. Do not log full account summaries, PDF passwords, or sensitive PDF contents.
-- Prefer small, focused services for parsing, validation, persistence, payment mocking, appointment booking, and email/PDF notification.
+- Keep the core logic understandable and testable. Small services for parsing, validation, database writes, mocked payment, appointments, and notifications are usually enough.
 
 Useful Supabase references:
 
 - [Supabase Next.js quickstart](https://supabase.com/docs/guides/getting-started/quickstarts/nextjs)
 - [Supabase local development](https://supabase.com/docs/guides/local-development)
 - [Supabase database migrations](https://supabase.com/docs/guides/deployment/database-migrations)
-
-## What is already provided
-
-- A Next.js app with a basic account portal UI.
-- A fixture-backed account summary using `fixtures/debtor-standard.json`.
-- Additional scenario fixtures in `fixtures/`.
-- A Conversations view wired to the starter `/api/chat` boundary.
-- Typed account and chat contracts in `src/lib/account/types.ts` and `src/lib/chat/types.ts`.
-- A placeholder `/api/chat` route for the backend boundary.
-- A notification boundary stub for the Resend and encrypted PDF side effect.
-- Starter Vitest setup with fixture validation and skipped acceptance-contract examples.
-- A Supabase migration stub with starter tables and seeded standard account data.
-- Scenario and account-context docs in `docs/`.
-- Supabase environment scaffolding for later persistence work.
-
-The backend/API for real message processing is not implemented yet.
-
-## Suggested Supabase data model
-
-The starter migration creates a minimal table outline and seed data for the standard account. You may change the exact table shapes, but document your final model and any important tradeoffs. Your Supabase schema will probably need tables for:
-
-- account holders
-- current contact details
-- related people
-- promises to pay
-- transactions
-- call appointments
-- chat messages or conversation turns
-- notification attempts
-
-You do not need to perfectly mirror PayPathIQ. This is a focused challenge for a single-account chatbot.
 
 ## Example acceptance scenarios
 
@@ -320,20 +283,7 @@ Submit:
 - an architecture diagram saved in the repo root as `architecture-diagram.png`, `architecture-diagram.pdf`, or `architecture-diagram.md`
 - tests for the core decision/action logic
 
-Your `README.md` should link to the architecture diagram and deployed application URL.
-
-Your write-up should explicitly answer: how can you improve and monitor this system over time?
-
-## Use of AI coding tools
-
-You may use tools such as Claude Code, Codex, Cursor, or similar. We encourage effective use of these tools.
-
-However, you are responsible for the submission and should be able to explain:
-
-- how the system works
-- the key design decisions
-- where AI tools helped
-- what you reviewed or changed yourself
+When you are finished, invite `wardch` as a collaborator so the submission can be reviewed. Your `README.md` should link to the deployed application and architecture diagram, explain how the system works, and answer: how can you improve and monitor this system over time?
 
 ## What we're evaluating
 
@@ -360,34 +310,14 @@ Hard failure cases:
 - deployed submission cannot send through Resend with an encrypted PDF attachment
 - broad rewrites that discard the starter UI instead of building on it
 
-## Provided input data
-
-Sample account context lives in `fixtures/`.
-
-Every fixture starts with phone number `+353831234567`, so the initial encrypted PDF password is `4567`.
-
-You may change the fixture shape if your implementation needs it, but document the final shape in your design note.
-
-## Submission notes
-
-- Use the GitHub `Use this template` button to create your own repository from this starter before you begin.
-- Set the new repository visibility to `Private`.
-- Do not push your submission to the shared source repository.
-- Treat your private copy of this repository as the submission artifact.
-- When you are finished, invite `wardch` as a collaborator so the submission can be reviewed.
-- Keep your write-up in `README.md` so reviewers can find it immediately.
-- Deploy the app with [Vercel](https://vercel.com/) so reviewers can try it easily.
-- Include the deployed URL prominently in `README.md`.
-- Put the architecture diagram in the repo root and reference it from `README.md`.
-- If you make reasonable scope cuts, document them clearly.
-
 ## Project structure
 
 - `src/app/page.tsx` wires the standard fixture into the main portal UI.
-- `src/components/debtor-portal.tsx` contains the current page layout, chat state, and placeholder reply behaviour.
-- `src/app/api/chat/route.ts` marks the backend chat boundary candidates should implement.
+- `src/components/debtor-portal.tsx` contains the current dashboard and chat UI.
+- `src/app/api/chat/route.ts` marks the backend chat route candidates should implement.
 - `src/lib/account/types.ts` and `src/lib/chat/types.ts` define the starter contracts.
-- `src/lib/notifications/account-change-notification.ts` marks the notification side-effect boundary candidates should implement.
+- `src/lib/notifications/account-change-notification.ts` marks the notification side-effect candidates should implement.
+- `supabase/migrations/` contains the starter database schema and seed data.
 - `docs/account-context.md` explains fixture fields and mutability.
 - `docs/scenarios.md` gives acceptance-flow examples.
 - `src/lib/supabase/client.ts` provides a browser client factory for later integration.
