@@ -23,6 +23,19 @@ Useful checks:
 - `pnpm typecheck`
 - `pnpm test`
 
+## Expected use of AI tools
+
+We expect you to code with a coding assistant such as Codex, Claude Code, Cursor, or similar. Using AI tools well is part of modern software engineering.
+
+You are still responsible for the submission. You must understand the code that is produced and be able to explain the architecture, data model, tradeoffs, tests, and any AI-generated changes you accepted or rejected.
+
+## Recommended design workflow
+
+Before building, we recommend using Matt Pocock's `grill-with-docs` / `grill-me` style workflow to work through the problem with an LLM. We use this approach regularly because it helps the model ask questions, inspect the codebase, sharpen assumptions, and produce a better solution than trying to generate everything in one shot.
+
+- Video explanation: [Matt Pocock skill walkthrough](https://www.youtube.com/watch?v=6BB6exR8Zd8&t=651s)
+- Installation guide: [AI Hero: Skills - Grill Me](https://www.aihero.dev/skills-grill-me)
+
 ## UI preview
 
 This is what the starter UI looks like before you begin extending it:
@@ -144,9 +157,11 @@ For tests, mock the notification boundary. Do not make automated tests depend on
 
 ## LLM guidance
 
-You may use an LLM to parse free-text messages into structured actions and fields, but you do not have to.
+You should use an LLM to parse free-text messages into structured actions and fields. This is one of the most useful parts of the exercise: the system needs to infer intent and extract details from messy incoming text before applying controlled business logic.
 
-A deterministic parser, rule-based intent router, structured form fallback, or hybrid approach is also acceptable if it works well. What matters is that the system:
+You can use your own API key from a provider such as OpenAI, Anthropic, OpenRouter, or another model service. Some providers offer free credits for new accounts. Do not commit API keys or secrets to the repository.
+
+A deterministic validator, rule-based action router, structured form fallback, or hybrid approach is still useful after the LLM parses the message. What matters is that the system:
 
 - handles the required workflows
 - asks for missing information instead of guessing dangerous details
