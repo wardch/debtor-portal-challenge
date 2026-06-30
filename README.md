@@ -19,15 +19,12 @@ You do not need debt-collection or finance experience to complete this challenge
 - **Preferred contact method**: how the customer wants to be contacted, such as email, SMS, or phone.
 - **Persistence / persisted data**: data that is saved in the database and still exists after the page is refreshed.
 - **Fixture data**: starter sample data in JSON files. It is fake data used so the app has something to show before you connect the database.
-- **Migration**: a database setup file that creates or changes tables.
-- **Schema**: the shape of the database: table names, column names, relationships, and rules.
 - **Supabase**: the database service used in this challenge. Use it to store account data so changes survive refreshes.
 - **Resend**: the email service used in this challenge. Use it to send the account-change notification email.
 - **Mocked payment**: a fake payment for this challenge. You should record it and reduce the balance, but you should not contact a real payment provider.
-- **LLM**: a large language model, such as OpenAI, Claude, or a model behind OpenRouter. You may use one to turn free-text messages into structured actions.
 - **Encrypted PDF**: a password-protected PDF attachment. In this challenge, sensitive account details should go in this PDF instead of the email body.
 - **API route**: server-side code that the frontend calls. In this starter, `/api/chat` is the backend route the chat UI calls.
-- **Notification boundary**: the place in the code where the app sends or logs the email notification. Tests should fake this part instead of sending real email.
+- **Notification boundary**: the place in the code where the app sends or logs the email notification. Tests should fake this part instead of sending real email but the deployed production app should send real emails.
 - **Acceptance scenario / contract test**: an example workflow the finished app should handle. The skipped tests show important behaviours you can turn into real tests.
 
 ## Start here
@@ -78,7 +75,7 @@ We expect you to code with a coding assistant such as Codex, Claude Code, Cursor
 
 You are still responsible for the submission. You must understand the code that is produced and be able to explain the architecture, data model, tradeoffs, tests, and any AI-generated changes you accepted or rejected.
 
-## Recommended design workflow
+## Recommended design workflow tip
 
 Before building, we recommend using Matt Pocock's `grill-with-docs` / `grill-me` style workflow to work through the problem with an LLM. We use this approach regularly because it helps the model ask questions, inspect the codebase, sharpen assumptions, and produce a better solution than trying to generate everything in one shot.
 
@@ -124,7 +121,7 @@ Your chatbot should parse the request, ask for missing details where needed, app
 
 Most good submissions will follow this path:
 
-- seed Supabase from the fixture data
+- seed Supabase from the fixture data. You can start Supabase locally on your machine with Docker if you'd like (recommended), or you can develop against a remote Supabase DB if you'd prefer.
 - replace the starter fixture read with a real account loaded from the database
 - implement `/api/chat` so messages become structured actions and fields
 - validate each action before writing account data
