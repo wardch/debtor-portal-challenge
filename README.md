@@ -1,8 +1,34 @@
 # Account Self-Service Chatbot Challenge
 
-Build this starter into a small but credible account self-service chatbot for an overdue receivables account.
+Build this starter into a small but credible account self-service chatbot for a customer who owes money on an overdue account.
 
-The goal is to test whether you can turn natural-language customer requests into safe, persistent product actions. The app should feel simple, but the backend behaviour should be clear enough that a reviewer can inspect what happened and why.
+The goal is to test whether you can turn everyday customer messages into safe product actions that are saved in a database. The app should feel simple, but the server-side behaviour should be clear enough that a reviewer can inspect what happened and why.
+
+## Plain English terms
+
+You do not need debt-collection or finance experience to complete this challenge. These terms appear throughout the brief:
+
+- **Receivables account**: money a customer owes to a business. Example: Jane missed an energy bill payment, so her energy provider has an overdue receivables account for her.
+- **Account holder**: the customer whose account this is. In the starter data, this is Jane Murphy.
+- **Creditor**: the business that is owed money. In the starter data, this is Example Energy Ireland.
+- **Overdue account**: an account where payment was due in the past and has not been fully paid.
+- **Balance**: the amount still owed.
+- **Transaction**: a record of money moving on the account, such as a charge, fee, adjustment, or payment.
+- **Promise to pay**: a customer's agreement to pay a specific amount on a future date. Example: "I can pay 500 euro on the 1st of next month."
+- **Related person**: someone the customer adds to the account, such as a spouse or sibling, who may be allowed to speak or act for them.
+- **Preferred contact method**: how the customer wants to be contacted, such as email, SMS, or phone.
+- **Persistence / persisted data**: data that is saved in the database and still exists after the page is refreshed.
+- **Fixture data**: starter sample data in JSON files. It is fake data used so the app has something to show before you connect the database.
+- **Migration**: a database setup file that creates or changes tables.
+- **Schema**: the shape of the database: table names, column names, relationships, and rules.
+- **Supabase**: the database service used in this challenge. Use it to store account data so changes survive refreshes.
+- **Resend**: the email service used in this challenge. Use it to send the account-change notification email.
+- **Mocked payment**: a fake payment for this challenge. You should record it and reduce the balance, but you should not contact a real payment provider.
+- **LLM**: a large language model, such as OpenAI, Claude, or a model behind OpenRouter. You may use one to turn free-text messages into structured actions.
+- **Encrypted PDF**: a password-protected PDF attachment. In this challenge, sensitive account details should go in this PDF instead of the email body.
+- **API route**: server-side code that the frontend calls. In this starter, `/api/chat` is the backend route the chat UI calls.
+- **Notification boundary**: the place in the code where the app sends or logs the email notification. Tests should fake this part instead of sending real email.
+- **Acceptance scenario / contract test**: an example workflow the finished app should handle. The skipped tests show important behaviours you can turn into real tests.
 
 ## Start here
 
