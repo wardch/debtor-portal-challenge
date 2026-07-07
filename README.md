@@ -220,6 +220,27 @@ Use the last 4 digits of the account holder's phone number as the PDF password. 
 
 For local development, it is acceptable to log the email payload when Resend credentials are missing, but the production/deployed app should be wired to Resend.
 
+#### Resend setup
+
+To wire real email delivery, create a Resend account, create an API key with sending access, and verify the sender domain you plan to use. For local development, copy `.env.local.example` to `.env.local` and set:
+
+```bash
+RESEND_API_KEY=re_your_real_key
+NOTIFICATION_FROM_EMAIL=Account Portal <notifications@your-verified-domain.example>
+```
+
+Use a sender address that Resend is allowed to send from. For deployment, add the same variables to your hosting platform's environment variables.
+
+Optional setup helper: install the Resend CLI and use it with your AI coding tool while implementing the email boundary. The CLI can authenticate with `RESEND_API_KEY` from your shell or saved credentials from `resend login`, and Resend also provides an agent skill for CLI-aware coding assistants:
+
+```bash
+npm install -g resend-cli
+resend login
+npx skills add resend/resend-cli
+```
+
+Do not paste real API keys into an AI chat. Put secrets in `.env.local` for local development and in your deployment platform's environment variables for production, then ask your coding assistant to implement `sendAccountChangeNotification` using `RESEND_API_KEY`, `NOTIFICATION_FROM_EMAIL`, and mocked tests around the notification boundary.
+
 For tests, mock the notification boundary. Do not make automated tests depend on live Resend delivery or real inbox inspection. Reviewers should be able to verify from code and logs that production sends through Resend and attaches the encrypted PDF.
 
 ## LLM guidance
