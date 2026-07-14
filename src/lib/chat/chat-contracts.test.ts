@@ -17,15 +17,11 @@ describe.skip("chat action acceptance contracts", () => {
     expect.fail("Implement this in your chat action tests.");
   });
 
-  it("confirms and atomically records an idempotent mocked payment", () => {
+  it("records a mocked payment transaction and deducts it from balance", () => {
     expect.fail("Implement this in your chat action tests.");
   });
 
   it("books a future call appointment and rejects dates in the past", () => {
-    expect.fail("Implement this in your chat action tests.");
-  });
-
-  it("keeps a successful change and records a redacted notification failure", () => {
     expect.fail("Implement this in your chat action tests.");
   });
 });

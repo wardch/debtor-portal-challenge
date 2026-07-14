@@ -53,16 +53,16 @@ Do not commit API keys or other secrets.
 
 Feature coverage alone is not enough. We are looking for evidence that you can make money-adjacent and sensitive-data workflows safe under failure, retries, and ambiguous input.
 
-Your solution should demonstrate these properties:
+We will look at whether:
 
-- **All-or-nothing payments:** recording a mocked payment and reducing the balance must succeed or fail as one operation. The balance and transaction history must not drift apart.
-- **Retry safety:** retrying the same payment request must not create a duplicate payment. Explain how you identify repeat requests.
-- **Explicit confirmation:** ask the user to confirm before applying a mocked payment.
-- **Real follow-up turns:** when information is missing, remember the pending request and use the user's next message to complete it. Explain where that state lives and what happens after a restart or deployment.
-- **Controlled side effects:** LLM output is untrusted input. Validate it before calling deterministic business logic, database writes, payments, or notifications.
-- **Safe account identity:** this challenge has no authentication, so resolve the single demo account on the server. Do not trust an arbitrary account ID supplied by the browser.
-- **Observable failures:** if notification delivery fails after a successful change, keep the change and record enough non-sensitive information for an operator to see and retry the failed notification.
-- **Reviewable boundaries:** parsing, validation, business actions, persistence, and notifications should be independently testable. A large route handler that owns all of them will score poorly even if the happy path works.
+- account state remains consistent when a request fails or is repeated
+- incomplete and ambiguous requests are handled safely
+- untrusted input is validated before it can change data or trigger side effects
+- account identity and sensitive data have a clear trust boundary
+- failures are observable without leaking account information
+- another engineer can test, review, and extend the important decisions in the system
+
+Choose the design you think best meets those outcomes and explain the important tradeoffs. We are interested in your engineering judgment, not a particular architecture or library.
 
 ## Required behaviour
 
@@ -89,9 +89,9 @@ Your solution must handle these workflows end to end.
 ### Mocked payment and transactions
 
 - Treat payment details as already on file; do not integrate a real payment provider.
-- Ask for confirmation before applying the payment.
-- Record the payment transaction and reduce the persisted balance atomically.
-- Make payment requests idempotent so a retry cannot create a duplicate charge.
+- Record the payment as a transaction and reduce the persisted balance.
+- Ensure the balance and transaction history cannot be left inconsistent.
+- Decide how confirmation, repeated requests, and failures should behave, then document those choices.
 - Show seeded transactions and new mocked payments.
 - Reject zero, negative, malformed, and over-balance amounts.
 
@@ -112,7 +112,7 @@ After every successful data change:
 
 For local development, you may log a redacted notification when Resend is not configured. The deployed app must be capable of sending the email and encrypted PDF. Automated tests must mock this boundary.
 
-Record each notification attempt and its outcome (`sent`, `failed`, or locally `logged`) without storing sensitive email or PDF content.
+Make notification failures observable without storing sensitive email or PDF content. Document how an operator could understand and recover from a delivery failure.
 
 ## Technical expectations
 
@@ -121,7 +121,7 @@ Record each notification attempt and its outcome (`sent`, `failed`, or locally `
 - Keep validation and business rules deterministic and testable.
 - Do not let an LLM write directly to the database or trigger side effects without validation.
 - Handle ambiguous input and missing details without guessing.
-- Keep privileged Supabase credentials server-side. If browser access uses a publishable key, enforce appropriate Row Level Security policies.
+- Document the system's trust assumptions and ensure a caller cannot read or change an unintended account.
 - Avoid logging account summaries, PDF passwords, or other sensitive data.
 - Mock LLM, email, PDF delivery, and payment side effects in automated tests.
 - Document important schema or architecture decisions.
@@ -137,12 +137,10 @@ At minimum, demonstrate that the system can handle:
 3. “Add Mark Murphy, mark@example.test, +353831998877 so he can act for me.”
 4. “Add my brother so he can speak for me.” — ask for the missing details, then complete the same request when the user provides them in a follow-up message.
 5. “Can I pay 500 euro on the 1st of next month?”
-6. “Pay 150 euro now.” — ask for confirmation, apply it once, and return the updated balance and transaction.
-7. Retry the confirmed payment request — do not apply it twice.
-8. “Show my transactions.”
-9. “Book a call next Tuesday at 10am about my bill.”
-10. “Book a call yesterday.” — reject it and ask for a future date.
-11. Simulate an LLM, database, or notification failure and return a safe, useful response without corrupting data.
+6. “Pay 150 euro now.”
+7. “Show my transactions.”
+8. “Book a call next Tuesday at 10am about my bill.”
+9. “Book a call yesterday.” — reject it and ask for a future date.
 
 More detail is available in [the acceptance scenarios](./docs/scenarios.md) and [account context](./docs/account-context.md). The skipped examples in `src/lib/chat/chat-contracts.test.ts` may be replaced or extended with your own tests.
 
@@ -155,9 +153,7 @@ At minimum, automated tests should cover:
 - the required successful workflows
 - missing, invalid, and ambiguous input
 - multi-turn clarification and completion
-- atomic and idempotent mocked payment behaviour
-- database failure before and during a change
-- notification failure after a successful change
+- important failure and repeated-request behaviour
 - email redaction and PDF password/encryption behaviour
 - invalid or hallucinated LLM output
 
@@ -176,8 +172,8 @@ Your private repository must include:
 - a design note of no more than 800 words covering:
   - architecture and data model
   - the most important tradeoffs and assumptions
-  - what happens on duplicate requests, partial database failure, invalid LLM output, and notification failure
-  - how account identity and sensitive data would be protected with real authentication
+  - the most important failure modes and how the system handles them
+  - security, account-identity, and sensitive-data assumptions
   - what you would monitor and improve next
 
 Invite `wardch` as a collaborator when the submission is ready.
@@ -188,7 +184,7 @@ We will score the submission using this rubric:
 
 | Area | Weight | Strong evidence |
 | --- | ---: | --- |
-| Correctness and persistence | 35% | Workflows operate end to end; payments remain atomic and idempotent after failure, refresh, or retry. |
+| Correctness and persistence | 35% | Workflows operate end to end and persisted state remains correct after refresh, failure, or a repeated request. |
 | Safety and validation | 20% | Identity, invalid input, ambiguous requests, database exposure, and sensitive data are handled deliberately. |
 | Code and data design | 20% | Parsing, business logic, persistence, and side effects have clear boundaries and sensible concurrency choices. |
 | Tests | 5% | Offline deterministic tests cover core rules, failure paths, retries, and mocked boundaries. |
@@ -201,13 +197,10 @@ A submission is not review-ready if it has any of these failures:
 
 - a required workflow is still a stub, `TODO`, or design-only plan
 - changed data does not persist
-- payment and balance writes can partially succeed or a retried payment can be applied twice
 - core decision or action tests require live credentials, network access, or remain skipped
-- missing details cannot be completed in a follow-up message
 - a real payment provider is used
 - sensitive account details appear in email bodies or logs
 - a successful data change makes no notification attempt
-- the browser can select an arbitrary account while the server uses privileged database access
 - the deployed app cannot send a Resend email with an encrypted PDF
 - the documented clean-clone checks do not pass
 - the starter is discarded in favour of an unrelated rewrite
