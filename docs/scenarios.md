@@ -18,7 +18,7 @@ Expected behaviour: validate the phone number, persist it, confirm the change, a
 
 User: "Add my brother so he can speak for me."
 
-Expected behaviour: ask for missing name, phone number, and email address before writing anything.
+Expected behaviour: ask for missing name, phone number, and email address before writing anything. Keep enough pending-request context to complete the same action when the user supplies those details in the next message.
 
 ## Add Authorized Related Person
 
@@ -42,7 +42,9 @@ Expected behaviour: parse amount and future date, store a one-time promise to pa
 
 User: "Pay 150 euro now."
 
-Expected behaviour: record a completed mocked payment transaction, reduce the account balance by 150 euro, confirm that saved payment details were used, and queue the generic email with encrypted PDF.
+Expected behaviour: validate the amount and ask the user to confirm before writing anything. After confirmation, record the transaction and reduce the balance as one atomic operation, then queue the generic email with encrypted PDF.
+
+If the confirmed request is retried with the same idempotency key, return the original result without recording another payment or reducing the balance again.
 
 ## Transaction History
 
@@ -61,3 +63,9 @@ Expected behaviour: schedule a future call appointment, confirm the time and pho
 User: "Book a call yesterday."
 
 Expected behaviour: reject the past date and ask for a future date.
+
+## Notification Failure
+
+Scenario: a valid account change succeeds, but Resend or PDF delivery fails.
+
+Expected behaviour: keep the successful account change, return a safe response, and record a redacted failed notification attempt that can be inspected or retried. Do not expose sensitive content in the response or logs.

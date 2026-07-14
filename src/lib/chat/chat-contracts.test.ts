@@ -9,15 +9,23 @@ describe.skip("chat action acceptance contracts", () => {
     expect.fail("Implement this in your chat action tests.");
   });
 
+  it("completes a pending action from details supplied in a follow-up turn", () => {
+    expect.fail("Implement this in your chat action tests.");
+  });
+
   it("records a one-time promise to pay with amount and future due date", () => {
     expect.fail("Implement this in your chat action tests.");
   });
 
-  it("records a mocked payment transaction and deducts it from balance", () => {
+  it("confirms and atomically records an idempotent mocked payment", () => {
     expect.fail("Implement this in your chat action tests.");
   });
 
   it("books a future call appointment and rejects dates in the past", () => {
+    expect.fail("Implement this in your chat action tests.");
+  });
+
+  it("keeps a successful change and records a redacted notification failure", () => {
     expect.fail("Implement this in your chat action tests.");
   });
 });
